@@ -1,4 +1,3 @@
-// app/events/page.jsx
 "use client";
 
 import React, { useState, useMemo } from "react";
@@ -9,6 +8,15 @@ import StatsSection from "@/components/dashboard/event/StatsSection";
 import EventItem from "@/components/dashboard/event/EventItem";
 import { IconSearch, IconPlus } from "@/components/icons";
 import { initialEvents } from "@/lib/data";
+
+// 🔹 Definisikan tipe event supaya TS paham struktur datanya
+type EventItemType = {
+  id: string;
+  title: string;
+  description?: string;
+  date?: string;
+  // tambah field lain kalau memang ada di initialEvents (location, time, dsb)
+};
 
 const IconCalendar = () => (
   <svg
@@ -47,12 +55,13 @@ const IconClose = () => (
 );
 
 export default function EventPage() {
-  const [events, setEvents] = useState(initialEvents);
+  // 🔹 Kasih tipe ke events
+  const [events, setEvents] = useState<EventItemType[]>(initialEvents as EventItemType[]);
   const [searchTerm, setSearchTerm] = useState("");
   
   // Modal Controls
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedEvent, setSelectedEvent] = useState<EventItemType | null>(null);
   const [isMobileCalendarOpen, setIsMobileCalendarOpen] = useState(false);
 
   // Memoized Filtering
@@ -64,7 +73,7 @@ export default function EventPage() {
   }, [events, searchTerm]);
 
   // CRUD Save
-  const handleSaveEvent = (eventData) => {
+  const handleSaveEvent = (eventData: EventItemType) => {
     const exists = events.find((e) => e.id === eventData.id);
     if (exists) {
       setEvents((prev) =>
@@ -77,7 +86,7 @@ export default function EventPage() {
   };
 
   // CRUD Delete
-  const handleDeleteEvent = (eventId) => {
+  const handleDeleteEvent = (eventId: string) => {
     setEvents((prev) => prev.filter((e) => e.id !== eventId));
     closeModal();
   };
@@ -86,10 +95,12 @@ export default function EventPage() {
     setSelectedEvent(null);
     setIsModalOpen(true);
   };
-  const openModalForEdit = (event) => {
+
+  const openModalForEdit = (event: EventItemType) => {
     setSelectedEvent(event);
     setIsModalOpen(true);
   };
+
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedEvent(null);
@@ -127,8 +138,7 @@ export default function EventPage() {
         {/* Stats */}
         <StatsSection events={events} />
 
-        {/* Layout Utama: Flex Column di Mobile, Row di Desktop */}
-        {/* PERBAIKAN DI SINI: gap-3 untuk mobile, gap-6 untuk desktop */}
+        {/* Layout Utama */}
         <div className="flex flex-col lg:flex-row mt-6 gap-3 lg:gap-6">
           
           {/* Left Column */}
@@ -182,7 +192,6 @@ export default function EventPage() {
           </div>
 
           {/* Right Sidebar */}
-          {/* PERBAIKAN DI SINI: hapus mt-4 */}
           <aside className="w-full lg:w-80 flex flex-col gap-4 lg:mt-0">
             <div className="hidden lg:block">
               <CalendarWidget />
@@ -192,7 +201,7 @@ export default function EventPage() {
         </div>
       </main>
 
-      {/* Modals... (Sama seperti sebelumnya) */}
+      {/* Modals */}
       {isModalOpen && (
         <EventModal
           event={selectedEvent}
